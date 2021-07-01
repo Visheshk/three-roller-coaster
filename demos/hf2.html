@@ -30,6 +30,7 @@
             var matrix = [];
             var sizeX = 20,
                 sizeY = 5;
+            
             for (var i = 0; i < sizeX; i++) {
                 matrix.push([]);
                 for (var j = 0; j < sizeY; j++) {
@@ -45,6 +46,7 @@
             var hfShape = new CANNON.Heightfield(matrix, {
                 elementSize: 1
             });
+
             var hfBody = new CANNON.Body({ mass: 0 });
             hfBody.addShape(hfShape);
             hfBody.position.set(-sizeX * hfShape.elementSize / 2, -30, -10);
@@ -65,14 +67,14 @@
           }
 
           // Create the U shape
-          var UShape = new CANNON.Heightfield(matrixU, {
-            elementSize: 1
-          });
-          var UBody = new CANNON.Body({ mass: 0 });
-          UBody.addShape(UShape);
-          UBody.position.set(-sizeX * UShape.elementSize / 2, -30, -30);
-          world.addBody(UBody);
-          demo.addVisual(UBody);
+          // var UShape = new CANNON.Heightfield(matrixU, {
+          //   elementSize: 1
+          // });
+          // var UBody = new CANNON.Body({ mass: 0 });
+          // UBody.addShape(UShape);
+          // UBody.position.set(-sizeX * UShape.elementSize / 2, -30, -30);
+          // world.addBody(UBody);
+          // demo.addVisual(UBody);
 
 
           // Create a matrix of S shape
@@ -83,56 +85,65 @@
               var height = 2*Math.cos(i/sizeX * Math.PI * 3 + 2*Math.PI);
               if(j===0 || j === sizeY-2)
                 height += 1;
-              matrixS[i].push(height);
+              // matrixS[i].push(height);
             }
           }
 
           // Create the S shape
-          var SShape = new CANNON.Heightfield(matrixS, {
-            elementSize: 1
-          });
-          var SBody = new CANNON.Body({ mass: 0 });
-          SBody.addShape(SShape);
-          SBody.position.set(-sizeX * SShape.elementSize / 2, -30, -20);
-          world.addBody(SBody);
-          demo.addVisual(SBody);
+          // var SShape = new CANNON.Heightfield(matrixS, {
+          //   elementSize: 1
+          // });
 
+          // var SBody = new CANNON.Body({ mass: 0 });
+          // SBody.addShape(SShape);
+          // SBody.position.set(-sizeX * SShape.elementSize / 2, -30, -20);
+          // world.addBody(SBody);
+          // demo.addVisual(SBody);
+
+          var addSphere = function(i, j, a, b) {
+            var sphereShape = new CANNON.Sphere(0.2);
+            var sphereBody = new CANNON.Body({ mass: mass });
+            sphereBody.addShape(sphereShape);
+            sphereBody.position.set(a + i, j, b);
+            // sphereBody.position.vadd(hfBody.position, sphereBody.position);
+            world.addBody(sphereBody);
+            demo.addVisual(sphereBody);
+
+
+            // var sphereShape = new CANNON.Sphere(0.2);
+            // var sphereBody = new CANNON.Body({ mass: mass });
+            // sphereBody.addShape(sphereShape);
+            // sphereBody.position.set(-2.1 + i, j, -5);
+            // sphereBody.position.vadd(hfBody.position, sphereBody.position);
+            // world.addBody(sphereBody);
+            // demo.addVisual(sphereBody);
+
+
+            // var sphereShape = new CANNON.Sphere(0.2);
+            // var sphereBody = new CANNON.Body({ mass: mass });
+            // sphereBody.addShape(sphereShape);
+            // sphereBody.position.set(i + 2, j, -23);
+            // sphereBody.position.vadd(hfBody.position, sphereBody.position);
+            // world.addBody(sphereBody);
+            // demo.addVisual(sphereBody);
+          }
 
             // Add spheres
-            var mass = 1;
+          var mass = 1;
+
+          var addAllBalls = function (a, b) {
             for(var i=0; i<sizeX - 1; i++){
                 for (var j = 0; j < sizeY - 1; j++) {
                     if(i===0 || i >= sizeX-2 || j===0 || j >= sizeY-2)
                         continue;
-                    // if (i=== 10 && j===5) {
-                        var sphereShape = new CANNON.Sphere(0.2);
-                        var sphereBody = new CANNON.Body({ mass: mass });
-                        sphereBody.addShape(sphereShape);
-                        sphereBody.position.set(0.25 + i, j, 3);
-                        sphereBody.position.vadd(hfBody.position, sphereBody.position);
-                        world.addBody(sphereBody);
-                        demo.addVisual(sphereBody);
-
-
-                      var sphereShape = new CANNON.Sphere(0.2);
-                      var sphereBody = new CANNON.Body({ mass: mass });
-                      sphereBody.addShape(sphereShape);
-                      sphereBody.position.set(-2.1 + i, j, -5);
-                      sphereBody.position.vadd(hfBody.position, sphereBody.position);
-                      world.addBody(sphereBody);
-                      demo.addVisual(sphereBody);
-
-
-                      var sphereShape = new CANNON.Sphere(0.2);
-                      var sphereBody = new CANNON.Body({ mass: mass });
-                      sphereBody.addShape(sphereShape);
-                      sphereBody.position.set(i + 2, j, -23);
-                      sphereBody.position.vadd(hfBody.position, sphereBody.position);
-                      world.addBody(sphereBody);
-                      demo.addVisual(sphereBody);
+                    // if (i=== 0 && j===0) {
+                        addSphere(i, j, a, b);
                     // }
                 }
             }
+          }
+          addAllBalls(3, 3)
+
         });
 
       demo.start();
