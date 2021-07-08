@@ -5,6 +5,12 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/style.css" type="text/css"/>
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <span style="padding-left:150px"></span>
+    <button type="uphill" onclick="addUpHill()">uphill</button>
+    <button type="downhill" onclick="addDownHill()">downhill</button>
+    <button type="Ushape" onclick="addUShape()">U shape</button>
+    <button type="DropBall" onclick="DropBall()">Drop Ball</button>
+
   </head>
   <body>
     <script src="../build/cannon.js"></script>
@@ -18,71 +24,52 @@
     <script>
 
         var demo = new CANNON.Demo();
+        // Init world
+        var world = demo.getWorld();
+        world.gravity.set(0, 0, -10);
+        world.broadphase = new CANNON.NaiveBroadphase();
+        var sizeX = 20, sizeY = 5;
+        var pos = 0;
+        var yaxis = -20;
 
-        demo.addScene("Heightfield", function () {
-
-            // Init world
-            var world = demo.getWorld();
-            world.gravity.set(0, 0, -10);
-            world.broadphase = new CANNON.NaiveBroadphase();
-
-            // Create a matrix of height values
-            var matrix = [];
-            var sizeX = 20,
-                sizeY = 5;
-            
-            for (var i = 0; i < sizeX; i++) {
-                matrix.push([]);
-                for (var j = 0; j < sizeY; j++) {
-                    var height = 2*Math.sin(i/sizeX * Math.PI * 2) ;
-                    if(j===0 || j === sizeY-2)
-                      height += 1;
-                    matrix[i].push(height);
-
-                }
-            }
-
-            // Create the heightfield
-            var hfShape = new CANNON.Heightfield(matrix, {
-                elementSize: 1
-            });
-
-            var hfBody = new CANNON.Body({ mass: 0 });
-            hfBody.addShape(hfShape);
-            hfBody.position.set(-sizeX * hfShape.elementSize / 2, -30, -10);
-            world.addBody(hfBody);
-            demo.addVisual(hfBody);
-
-
-          // Create a matrix of U shape
-          var matrixU = [];
+        //@zhilin: using sigmoid function
+        function addUpHill(){
+          // // Create a matrix of height values
+          var matrix = [];
           for (var i = 0; i < sizeX; i++) {
-            matrixU.push([]);
+            matrix.push([]);
             for (var j = 0; j < sizeY; j++) {
-              var height = 10 * Math.sin(i / sizeX * Math.PI * 1 + Math.PI);
+              // var height = 2*Math.sin(i/sizeX * Math.PI * 2) ;
+              var height = 6/(1+Math.exp(i - 10));
               if(j===0 || j === sizeY-2)
                 height += 1;
-              matrixU[i].push(height);
+              matrix[i].push(height);
+
             }
           }
+          console.log(matrix);
 
-          // Create the U shape
-          // var UShape = new CANNON.Heightfield(matrixU, {
-          //   elementSize: 1
-          // });
-          // var UBody = new CANNON.Body({ mass: 0 });
-          // UBody.addShape(UShape);
-          // UBody.position.set(-sizeX * UShape.elementSize / 2, -30, -30);
-          // world.addBody(UBody);
-          // demo.addVisual(UBody);
+          // Create the heightfield
+          var hfShape = new CANNON.Heightfield(matrix, {
+            elementSize: 1
+          });
+          var hfBody = new CANNON.Body({ mass: 0 });
+          hfBody.addShape(hfShape);
+          hfBody.position.set(pos, -30, yaxis);
+          pos -= sizeX - 1;
+          yaxis += 6;
+          world.addBody(hfBody);
+          demo.addVisual(hfBody);
+          console.log("click!");
+        };
 
-
+        function addDownHill(){
           // Create a matrix of S shape
           var matrixS = [];
           for (var i = 0; i < sizeX; i++) {
             matrixS.push([]);
             for (var j = 0; j < sizeY; j++) {
-              var height = 2*Math.cos(i/sizeX * Math.PI * 3 + 2*Math.PI);
+              var height = 6/(1+Math.exp(-i + 10));
               if(j===0 || j === sizeY-2)
                 height += 1;
               // matrixS[i].push(height);
@@ -90,63 +77,87 @@
           }
 
           // Create the S shape
-          // var SShape = new CANNON.Heightfield(matrixS, {
-          //   elementSize: 1
-          // });
+          var SShape = new CANNON.Heightfield(matrixS, {
+            elementSize: 1
+          });
+          var SBody = new CANNON.Body({ mass: 0 });
+          SBody.addShape(SShape);
+          SBody.position.set(pos, -30, yaxis - 6);
+          pos -= sizeX - 1;
+          yaxis -= 6;
+          world.addBody(SBody);
+          demo.addVisual(SBody);
 
-          // var SBody = new CANNON.Body({ mass: 0 });
-          // SBody.addShape(SShape);
-          // SBody.position.set(-sizeX * SShape.elementSize / 2, -30, -20);
-          // world.addBody(SBody);
-          // demo.addVisual(SBody);
+        };
 
-          var addSphere = function(i, j, a, b) {
-            var sphereShape = new CANNON.Sphere(0.2);
-            var sphereBody = new CANNON.Body({ mass: mass });
-            sphereBody.addShape(sphereShape);
-            sphereBody.position.set(a + i, j, b);
-            // sphereBody.position.vadd(hfBody.position, sphereBody.position);
-            world.addBody(sphereBody);
-            demo.addVisual(sphereBody);
-
-
-            // var sphereShape = new CANNON.Sphere(0.2);
-            // var sphereBody = new CANNON.Body({ mass: mass });
-            // sphereBody.addShape(sphereShape);
-            // sphereBody.position.set(-2.1 + i, j, -5);
-            // sphereBody.position.vadd(hfBody.position, sphereBody.position);
-            // world.addBody(sphereBody);
-            // demo.addVisual(sphereBody);
+        function addUShape(){
+          // Create a matrix of U shape
+          var matrixU = [];
+          for (var i = 0; i < sizeX; i++) {
+            matrixU.push([]);
+            for (var j = 0; j < sizeY; j++) {
+              // var medium = 10;
+              // var sd = 1.001;
+              // var temp = Math.exp(-(i - medium)/sd);
+              // var height = 10*temp/(sd*(1+temp)*(1+temp));
+              var height;
+              // if(i <= 1 || i >= 18){
+              //   height = 0.5;
+              // }else{
+                height = 7 * Math.sin(i / sizeX * Math.PI + Math.PI);
+              // }
 
 
-            // var sphereShape = new CANNON.Sphere(0.2);
-            // var sphereBody = new CANNON.Body({ mass: mass });
-            // sphereBody.addShape(sphereShape);
-            // sphereBody.position.set(i + 2, j, -23);
-            // sphereBody.position.vadd(hfBody.position, sphereBody.position);
-            // world.addBody(sphereBody);
-            // demo.addVisual(sphereBody);
+
+              if(j===0 || j === sizeY-2)
+                height += 1;
+              matrixU[i].push(height);
+            }
+            console.log(matrixU);
           }
 
-            // Add spheres
-          var mass = 1;
 
-          var addAllBalls = function (a, b) {
-            for(var i=0; i<sizeX - 1; i++){
-                for (var j = 0; j < sizeY - 1; j++) {
-                    if(i===0 || i >= sizeX-2 || j===0 || j >= sizeY-2)
-                        continue;
-                    // if (i=== 0 && j===0) {
-                        addSphere(i, j, a, b);
-                    // }
-                }
+          // Create the U shape
+          var UShape = new CANNON.Heightfield(matrixU, {
+            elementSize: 1
+          });
+          var UBody = new CANNON.Body({ mass: 0 });
+          UBody.addShape(UShape);
+          UBody.position.set(pos, -30, yaxis+1);
+          pos -= sizeX - 1;
+          world.addBody(UBody);
+          demo.addVisual(UBody);
+        };
+
+        function DropBall(){
+          // // Add spheres
+          var mass = 1;
+          for(var i=0; i<sizeX - 1; i++){
+            for (var j = 0; j < sizeY - 1; j++) {
+              if(i===0 || i >= sizeX-2 || j===0 || j >= sizeY-2)
+                continue;
+              // if (i=== 10 && j===5) {
+              var sphereShape = new CANNON.Sphere(0.2);
+              var sphereBody = new CANNON.Body({ mass: mass });
+              sphereBody.addShape(sphereShape);
+              sphereBody.position.set( i, j-30, 3);
+              // sphereBody.position.vadd(hfBody.position, sphereBody.position);
+              world.addBody(sphereBody);
+              demo.addVisual(sphereBody);
             }
           }
-          addAllBalls(3, 3)
+        };
 
-        });
 
-      demo.start();
+        // demo.addScene("Heightfield", function () {
+
+            // // Init world
+            // var world = demo.getWorld();
+            // world.gravity.set(0, 0, -10);
+            // world.broadphase = new CANNON.NaiveBroadphase();
+
+        // });
+      //demo.start();
 
     </script>
   </body>
