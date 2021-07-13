@@ -28,12 +28,12 @@
 
             // Create a matrix of height values
             var matrix = [];
-            var sizeX = 15,
-                sizeY = 4;
+            var sizeX = 30,
+                sizeY = 5;
             for (var i = 0; i < sizeX; i++) {
                 matrix.push([]);
                 for (var j = 0; j < sizeY; j++) {
-                    var height = Math.cos(i/sizeX * Math.PI * 3)*Math.cos( Math.PI * 3) ;
+                    var height = 10*Math.cos(i/20 * Math.PI * 3)*Math.cos( Math.PI * 3) ;
                     // if(i===0 || i === sizeX-1 || j===0 || j === sizeY-1)
                     //     height = 3;
                     matrix[i].push(height);
@@ -42,7 +42,7 @@
 
             // Create the heightfield
             var hfShape = new CANNON.Heightfield(matrix, {
-                elementSize: 2
+                elementSize: 5
             });
             var hfBody = new CANNON.Body({ mass: 0 });
             hfBody.addShape(hfShape);
@@ -52,17 +52,21 @@
 
             // Add spheres
             var mass = 1;
+            addSphere = (i, j) => {
+                var sphereShape = new CANNON.Sphere(1);
+                var sphereBody = new CANNON.Body({ mass: mass });
+                sphereBody.addShape(sphereShape);
+                sphereBody.position.set(0.25 + i, 0.25 + j, 3);
+                sphereBody.position.vadd(hfBody.position, sphereBody.position);
+                world.addBody(sphereBody);
+                demo.addVisual(sphereBody);
+            }
+
             for(var i=0; i<sizeX - 1; i++){
                 for (var j = 0; j < sizeY - 1; j++) {
                     if(i===0 || i >= sizeX-2 || j===0 || j >= sizeY-2)
                         continue;
-                    var sphereShape = new CANNON.Sphere(0.5);
-                    var sphereBody = new CANNON.Body({ mass: mass });
-                    sphereBody.addShape(sphereShape);
-                    sphereBody.position.set(0.25 + i, 0.25 + j, 3);
-                    sphereBody.position.vadd(hfBody.position, sphereBody.position);
-                    world.addBody(sphereBody);
-                    demo.addVisual(sphereBody);
+                    addSphere(i, j);
                 }
             }
         });
