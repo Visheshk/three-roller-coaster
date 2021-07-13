@@ -10,6 +10,9 @@
     <button type="downhill" onclick="addDownHill()">downhill</button>
     <button type="Ushape" onclick="addUShape()">U shape</button>
     <button type="DropBall" onclick="DropBall()">Drop Ball</button>
+    <br>
+    <span style="padding-left:150px"></span>
+    <input type="range" min="1" max="5" value="50" class="slider" id="firstTrack">
 
   </head>
   <body>
@@ -23,46 +26,306 @@
     <script src="../libs/smoothie.js"></script>
     <script>
 
+/////////////////////////DATA STRUCTURE/////////////////////////
+        //use linkedlist to store tracks
+        class Node {
+            // constructor
+            constructor(element)
+            {
+                this.element = element;
+                this.next = null
+            }
+        }
+
+        // linkedlist class
+        class LinkedList {
+            constructor()
+            {
+                this.head = null;
+                this.size = 0;
+            }
+        
+            // functions to be implemented
+            // add(element)
+            // adds an element at the end
+            // of list
+            add(element)
+            {
+                // creates a new node
+                var node = new Node(element);
+            
+                // to store current node
+                var current;
+            
+                // if list is Empty add the
+                // element and make it head
+                if (this.head == null)
+                    this.head = node;
+                else {
+                    current = this.head;
+            
+                    // iterate to the end of the
+                    // list
+                    while (current.next) {
+                        current = current.next;
+                    }
+            
+                    // add node
+                    current.next = node;
+                }
+                this.size++;
+            }
+            // insertAt(element, location)
+            insertAt(element, index)
+            {
+                if (index < 0 || index > this.size)
+                    return console.log("Please enter a valid index.");
+                else {
+                    // creates a new node
+                    var node = new Node(element);
+                    var curr, prev;
+            
+                    curr = this.head;
+            
+                    // add the element to the
+                    // first index
+                    if (index == 0) {
+                        node.next = this.head;
+                        this.head = node;
+                    } else {
+                        curr = this.head;
+                        var it = 0;
+            
+                        // iterate over the list to find
+                        // the position to insert
+                        while (it < index) {
+                            it++;
+                            prev = curr;
+                            curr = curr.next;
+                        }
+            
+                        // adding an element
+                        node.next = curr;
+                        prev.next = node;
+                    }
+                    this.size++;
+                }
+            }
+            // removeFrom(location)
+            removeFrom(index)
+            {
+                if (index < 0 || index >= this.size)
+                    return console.log("Please Enter a valid index");
+                else {
+                    var curr, prev, it = 0;
+                    curr = this.head;
+                    prev = curr;
+            
+                    // deleting first element
+                    if (index === 0) {
+                        this.head = curr.next;
+                    } else {
+                        // iterate over the list to the
+                        // position to removce an element
+                        while (it < index) {
+                            it++;
+                            prev = curr;
+                            curr = curr.next;
+                        }
+            
+                        // remove the element
+                        prev.next = curr.next;
+                    }
+                    this.size--;
+            
+                    // return the remove element
+                    return curr.element;
+                }
+            }
+            // removeElement(element)
+            removeElement(element)
+            {
+                var current = this.head;
+                var prev = null;
+            
+                // iterate over the list
+                while (current != null) {
+                    // comparing element with current
+                    // element if found then remove the
+                    // and return true
+                    if (current.element === element) {
+                        if (prev == null) {
+                            this.head = current.next;
+                        } else {
+                            prev.next = current.next;
+                        }
+                        this.size--;
+                        return current.element;
+                    }
+                    prev = current;
+                    current = current.next;
+                }
+                return -1;
+            }
+            // Helper Methods
+            indexOf(element)
+            {
+                var count = 0;
+                var current = this.head;
+            
+                // iterae over the list
+                while (current != null) {
+                    // compare each element of the list
+                    // with given element
+                    if (current.element === element)
+                        return count;
+                    count++;
+                    current = current.next;
+                }
+            
+                // not found
+                return -1;
+            }
+            // isEmpty
+            isEmpty()
+            {
+                return this.size == 0;
+            }
+            // size_Of_List
+            size_of_list()
+            {
+                console.log(this.size);
+            }
+            // PrintList
+            printList()
+            {
+                var curr = this.head;
+                var str = "";
+                while (curr) {
+                    str += curr.element + " ";
+                    curr = curr.next;
+                }
+                console.log(str);
+            }
+        }
+/////////////////////////END/////////////////////////
+
+
+
+
+
         var demo = new CANNON.Demo();
         // Init world
         var world = demo.getWorld();
         world.gravity.set(0, 0, -10);
         world.broadphase = new CANNON.NaiveBroadphase();
-        var sizeX = 20, sizeY = 5;
-        var pos = 0;
-        var yaxis = -20;
+        var sizeX = 20, sizeY = 5; // this is the size of tracks (length and height)
+        var tracks_body = new LinkedList(); // use it to store tracks body
+        console.log(tracks_body.isEmpty()); // check
+        var tracks_shape = new LinkedList(); // use it to store tracks body
+        var pos = 0; // the starting position
+        var yaxis = -20;// the starting position
+        var slider1 = document.getElementById("firstTrack");
+        var count = 1;
+        var init_matrix;
+        slider1.addEventListener('input', sliderChange); 
+        var change = slider1.value;
+        function sliderChange() {
+          console.log(this.value);
+          if(!tracks_body.isEmpty()){
+            var track_body = tracks_body.removeFrom(0); 
+            var track_shape = tracks_shape.removeFrom(0);
+            var matrix = track_shape.data; //the old matrix
+            // world.removeBody(track_body);
+            demo.removeVisual(track_body);
+            console.log(world);
 
-        //@zhilin: using sigmoid function
+            //if the first time in
+            if(count == 1){
+              init_matrix = matrix;
+              count++;
+            }else{
+              matrix = init_matrix;
+            }
+
+            var matrix2 = [];
+            for (var i = 0; i < sizeX; i++) {
+              matrix2.push([]);
+              for (var j = 0; j < sizeY; j++) {
+                var height = matrix[i][j] * this.value;
+                matrix2[i].push(height);
+                if(j===0 || j === sizeY-2)
+                  height += 1;
+              }
+            }
+
+
+            console.log(matrix2);
+
+
+
+
+            track_shape = new CANNON.Heightfield(matrix2, {
+              elementSize: 1
+            });
+            track_body.shapes = [];
+            track_body.addShape(track_shape);
+            console.log(track_body);
+            console.log(track_shape);
+            console.log(world);
+            // // track_body.shapes = [];
+            // // track_body.position.set(10,-30,-20);
+            // // track_body.removeShape(track_shape);
+            // console.log(track_shape.boundingSphereRadius);
+            // // track_shape.boundingSphereRadius.set(10);
+
+            // // track_shape.halfExtents.x = 2;
+            // track_body.addShape(track_shape);
+            // // track_shape.halfExtents.set(1,2,3);
+            // // track_body.addShape(track_shape);
+            // // track.scale.set( 1, 1, 1 );
+            // // track.shape.halfExtents.z = 1;
+            // // console.log(1);
+            // world.addBody(track_body);
+            tracks_body.insertAt(track_body, 0);
+            tracks_shape.insertAt(track_shape, 0);
+            demo.addVisual(track_body);
+          }
+        }
+
+
+        //@zhilin: using sigmoid function for uphill track
         function addUpHill(){
           // // Create a matrix of height values
           var matrix = [];
           for (var i = 0; i < sizeX; i++) {
             matrix.push([]);
             for (var j = 0; j < sizeY; j++) {
-              // var height = 2*Math.sin(i/sizeX * Math.PI * 2) ;
-              var height = 6/(1+Math.exp(i - 10));
+              var height = 6/(1+Math.exp(i - 10)); // just a temp function
               if(j===0 || j === sizeY-2)
                 height += 1;
               matrix[i].push(height);
 
             }
           }
-          console.log(matrix);
 
-          // Create the heightfield
-          var hfShape = new CANNON.Heightfield(matrix, {
+          // Create the uphill track
+          var uphillShape = new CANNON.Heightfield(matrix, {
             elementSize: 1
           });
           var hfBody = new CANNON.Body({ mass: 0 });
-          hfBody.addShape(hfShape);
+          hfBody.addShape(uphillShape);
           hfBody.position.set(pos, -30, yaxis);
           pos -= sizeX - 1;
           yaxis += 6;
           world.addBody(hfBody);
           demo.addVisual(hfBody);
-          console.log("click!");
+          tracks_body.add(hfBody);
+          tracks_shape.add(uphillShape);
+          tracks_body.printList();
         };
 
+        //@zhilin: using sigmoid function for uphill track
         function addDownHill(){
           // Create a matrix of S shape
           var matrixS = [];
@@ -87,6 +350,9 @@
           yaxis -= 6;
           world.addBody(SBody);
           demo.addVisual(SBody);
+          tracks_body.add(SBody);
+          tracks_shape.add(SSahpe);
+          tracks_body.printList();
 
         };
 
@@ -96,24 +362,11 @@
           for (var i = 0; i < sizeX; i++) {
             matrixU.push([]);
             for (var j = 0; j < sizeY; j++) {
-              // var medium = 10;
-              // var sd = 1.001;
-              // var temp = Math.exp(-(i - medium)/sd);
-              // var height = 10*temp/(sd*(1+temp)*(1+temp));
-              var height;
-              // if(i <= 1 || i >= 18){
-              //   height = 0.5;
-              // }else{
-                height = 7 * Math.sin(i / sizeX * Math.PI + Math.PI);
-              // }
-
-
-
+              var height = 7 * Math.sin(i / sizeX * Math.PI + Math.PI);
               if(j===0 || j === sizeY-2)
                 height += 1;
               matrixU[i].push(height);
             }
-            console.log(matrixU);
           }
 
 
@@ -127,8 +380,13 @@
           pos -= sizeX - 1;
           world.addBody(UBody);
           demo.addVisual(UBody);
+          tracks_body.add(UBody);
+          tracks_shape.add(UShape);
+          tracks_body.printList();
         };
+         
 
+        //@zhilin: this should be replaced by car 
         function DropBall(){
           // // Add spheres
           var mass = 1;
@@ -148,18 +406,6 @@
           }
         };
 
-
-        // demo.addScene("Heightfield", function () {
-
-            // // Init world
-            // var world = demo.getWorld();
-            // world.gravity.set(0, 0, -10);
-            // world.broadphase = new CANNON.NaiveBroadphase();
-
-
-
-        // });
-      //demo.start();
 
     </script>
   </body>
