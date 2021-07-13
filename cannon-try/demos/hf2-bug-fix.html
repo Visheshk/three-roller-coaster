@@ -29,9 +29,10 @@
         var world = demo.getWorld();
         world.gravity.set(0, 0, -10);
         world.broadphase = new CANNON.NaiveBroadphase();
-        var sizeX = 20, sizeY = 5;
+        var sizeX = 20, sizeY = 6;
         var pos = 0;
         var yaxis = -20;
+        var elementSize = 1;
 
         //@zhilin: using sigmoid function
         function addUpHill(){
@@ -52,7 +53,7 @@
 
           // Create the heightfield
           var hfShape = new CANNON.Heightfield(matrix, {
-            elementSize: 1
+            elementSize: elementSize
           });
           var hfBody = new CANNON.Body({ mass: 0 });
           hfBody.addShape(hfShape);
@@ -79,7 +80,7 @@
 
           // Create the S shape
           var SShape = new CANNON.Heightfield(matrixS, {
-            elementSize: 1
+            elementSize: elementSize
           });
           var SBody = new CANNON.Body({ mass: 0 });
           SBody.addShape(SShape);
@@ -98,10 +99,10 @@
             matrixU.push([]);
             for (var j = 0; j < sizeY; j++) {
               var height;
-              height = 7 * Math.sin(2.1*i / sizeX * Math.PI + Math.PI/2) + 7 ;
+              height = 3 * Math.sin(2.1*i / sizeX * Math.PI + Math.PI/2) + 3 ;
               // console.log(height);
               // height = 7; 
-              height = height -3;
+              // height = height -3;
               if(j===0 || j === sizeY-2)
                 height += 0.8;
                 matrixU[i].push(height);
@@ -112,11 +113,11 @@
 
           // Create the U shape
           var UShape = new CANNON.Heightfield(matrixU, {
-            elementSize: 1
+            elementSize: elementSize
           });
           var UBody = new CANNON.Body({ mass: 0 });
           UBody.addShape(UShape);
-          UBody.position.set(pos, -30, yaxis+1);
+          UBody.position.set(pos, -30, yaxis-6);
           pos -= sizeX - 1;
           world.addBody(UBody);
           demo.addVisual(UBody);
@@ -125,20 +126,27 @@
         function DropBall(){
           // // Add spheres
           var mass = 1;
-          for(var i=0; i<sizeX - 1; i++){
-            for (var j = 0; j < sizeY - 1; j++) {
-              if(i===0 || i >= sizeX-2 || j===0 || j >= sizeY-2)
-                continue;
-              // if (i=== 10 && j===5) {
-              var sphereShape = new CANNON.Sphere(0.2);
-              var sphereBody = new CANNON.Body({ mass: mass });
-              sphereBody.addShape(sphereShape);
-              sphereBody.position.set( i, j-30, 3);
-              // sphereBody.position.vadd(hfBody.position, sphereBody.position);
-              world.addBody(sphereBody);
-              demo.addVisual(sphereBody);
-            }
-          }
+          var sphereShape = new CANNON.Sphere(0.4);
+          var sphereBody = new CANNON.Body({ mass: mass });
+          sphereBody.addShape(sphereShape);
+          sphereBody.position.set( 6, -29, -20);
+          // sphereBody.position.vadd(hfBody.position, sphereBody.position);
+          world.addBody(sphereBody);
+          demo.addVisual(sphereBody);
+          // for(var i=0; i<sizeX - 1; i++){
+          //   for (var j = 0; j < sizeY - 1; j++) {
+          //     if(i===0 || i >= sizeX-2 || j===0 || j >= sizeY-2)
+          //       continue;
+          //     // if (i=== 10 && j===5) {
+          //     var sphereShape = new CANNON.Sphere(0.2);
+          //     var sphereBody = new CANNON.Body({ mass: mass });
+          //     sphereBody.addShape(sphereShape);
+          //     sphereBody.position.set( i, j-30, 3);
+          //     // sphereBody.position.vadd(hfBody.position, sphereBody.position);
+          //     world.addBody(sphereBody);
+          //     demo.addVisual(sphereBody);
+          //   }
+          // }
         };
 
         function DeleteTrack(){
@@ -148,8 +156,11 @@
             console.log(world.bodies[i].type);
             if (world.bodies[i].type == 2) {
               console.log("found relevant body");
-              console.log(world.bodies[i]);
-              world.removeBody(world.bodies[i]);
+              b = world.bodies[i]
+              console.log(b);
+              world.removeBody(b);
+              demo.removeVisual(b);
+              pos += sizeX ;
               break;
             }
           }
