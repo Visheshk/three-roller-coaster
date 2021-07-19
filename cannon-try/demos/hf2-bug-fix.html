@@ -29,10 +29,11 @@
         var world = demo.getWorld();
         world.gravity.set(0, 0, -10);
         world.broadphase = new CANNON.NaiveBroadphase();
-        var sizeX = 20, sizeY = 6;
+        
         var pos = 0;
         var yaxis = -20;
         var elementSize = 1;
+        var sizeX = 20, sizeY = 6;
 
         //@zhilin: using sigmoid function
         function addUpHill(){
@@ -129,7 +130,7 @@
           var sphereShape = new CANNON.Sphere(0.4);
           var sphereBody = new CANNON.Body({ mass: mass });
           sphereBody.addShape(sphereShape);
-          sphereBody.position.set( 6, -29, -20);
+          sphereBody.position.set( 6, -29, -10);
           // sphereBody.position.vadd(hfBody.position, sphereBody.position);
           world.addBody(sphereBody);
           demo.addVisual(sphereBody);
