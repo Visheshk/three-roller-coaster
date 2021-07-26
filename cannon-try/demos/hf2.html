@@ -362,7 +362,9 @@
           for (var i = 0; i < sizeX; i++) {
             matrixU.push([]);
             for (var j = 0; j < sizeY; j++) {
-              var height = 7 * Math.sin(i / sizeX * Math.PI + Math.PI);
+              // var height = 7 * Math.sin(i / sizeX * Math.PI + Math.PI);
+
+              var height = -3*Math.cos(i/sizeX * Math.PI *2 )*Math.cos( Math.PI * 3) ;
               if(j===0 || j === sizeY-2)
                 height += 1;
               matrixU[i].push(height);
@@ -376,7 +378,7 @@
           });
           var UBody = new CANNON.Body({ mass: 0 });
           UBody.addShape(UShape);
-          UBody.position.set(pos, -30, yaxis+1);
+          UBody.position.set(pos, -30, yaxis-2.9);
           pos -= sizeX - 1;
           world.addBody(UBody);
           demo.addVisual(UBody);
