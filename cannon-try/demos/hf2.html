@@ -12,7 +12,18 @@
     <button type="DropBall" onclick="DropBall()">Drop Ball</button>
     <br>
     <span style="padding-left:150px"></span>
-    <input type="range" min="1" max="5" value="1" class="slider" id="firstTrack">
+
+    <br>
+    <span style="padding-left:150px"></span>
+    <select style="width: 200px" id="Track" name="Track">
+      <option selected="">Choose the track</option>
+      <option>Track 1</option>
+      <option>Track 2</option>
+      <option>Track 3</option>
+      <option>Track 4</option>
+      <option>Track 5</option>
+    </select>
+    <input type="range" min="1" max="2" value="1" step ="0.5" class="slider" id="firstTrack">
 
   </head>
   <body>
@@ -111,11 +122,40 @@
                     this.size++;
                 }
             }
+
+
+            getFrom(index)
+            {
+                if (index < 0 || index >= this.size)
+                    return -1;
+                else {
+                    var curr, prev, it = 0;
+                    curr = this.head;
+                    prev = curr;
+            
+                    // deleting first element
+                    if (index === 0) {
+                        return this.head.element;
+                    } else {
+                        // iterate over the list to the
+                        // position to removce an element
+                        while (it < index) {
+                            it++;
+                            prev = curr;
+                            curr = curr.next;
+                        }
+            
+                       return curr.element;
+                    }
+            
+                }
+            }
+
             // removeFrom(location)
             removeFrom(index)
             {
                 if (index < 0 || index >= this.size)
-                    return console.log("Please Enter a valid index");
+                    return -1;
                 else {
                     var curr, prev, it = 0;
                     curr = this.head;
@@ -142,6 +182,32 @@
                     return curr.element;
                 }
             }
+
+            updateFrom(index, element)
+            {
+                if (index < 0 || index >= this.size)
+                    return -1;
+                else {
+                    var curr, prev, it = 0;
+                    curr = this.head;
+                    prev = curr;
+            
+                    if (index === 0) {
+                        this.head.element = element;
+                    } else {
+                        // iterate over the list to the
+                        // position to removce an element
+                        while (it < index) {
+                            it++;
+                            prev = curr;
+                            curr = curr.next;
+                        }
+            
+                        curr.element = element;
+                    }
+              }
+            }
+
             // removeElement(element)
             removeElement(element)
             {
@@ -196,6 +262,10 @@
             {
                 console.log(this.size);
             }
+
+            getSize(){
+              return this.size;
+            }
             // PrintList
             printList()
             {
@@ -221,45 +291,60 @@
         world.broadphase = new CANNON.NaiveBroadphase();
         var sizeX = 20, sizeY = 5; // this is the size of tracks (length and height)
         var tracks_body = new LinkedList(); // use it to store tracks body
-        console.log(tracks_body.isEmpty()); // check
         var tracks_shape = new LinkedList(); // use it to store tracks body
         var pos = 0; // the starting position
         var yaxis = -20;// the starting position
         var slider1 = document.getElementById("firstTrack");
         var count = 1;
-        var init_matrix;
+        var init_matrix = new LinkedList();
+        var typeOfshape = new LinkedList(); 
+        var init_yaxis = -20;
         slider1.addEventListener('input', sliderChange); 
         var change = slider1.value;
+
+
+
         function sliderChange() {
           console.log(this.value);
-          if(!tracks_body.isEmpty()){
-            var track_body = tracks_body.removeFrom(0); 
-            var track_shape = tracks_shape.removeFrom(0);
+          var objSelect = document.getElementById("Track");
+          console.log(parseInt(objSelect.value.slice(-1)));
+          var index = parseInt(objSelect.value.slice(-1)) - 1;
+          var track_body;
+          if(index >= 0 && index < this.size){
+            var track_body = tracks_body.getFrom(index); 
+            console.log("track_body");
+            console.log(track_body);
+            var track_shape = tracks_shape.getFrom(index);
             var matrix = track_shape.data; //the old matrix
             // world.removeBody(track_body);
             demo.removeVisual(track_body);
+            console.log("world");
             console.log(world);
 
             //if the first time in
-            if(count == 1){
-              init_matrix = matrix;
-              count++;
-            }else{
-              matrix = init_matrix;
-            }
-
+            // if(count == 1){
+            //   init_matrix = matrix;
+            //   count++;
+            // }else{
+            //   matrix = init_matrix;
+            // }
+            console.log(init_matrix);
+            matrix = init_matrix.getFrom(index);
+            console.log("matrix");
+            console.log(matrix);
             var matrix2 = [];
             for (var i = 0; i < sizeX; i++) {
               matrix2.push([]);
               for (var j = 0; j < sizeY; j++) {
-                var height = matrix[i][j] * this.value;
+                var height = matrix[i][j] * this.value - (this.value - 1)*3;
                 matrix2[i].push(height);
-                if(j===0 || j === sizeY-2)
-                  height += 1;
+                // if(j===0 || j === sizeY-2)
+                //   // height = matrix[i][1]* this.value + 1 ;
+                //   height += 1;
               }
             }
 
-
+            console.log("matrix2");
             console.log(matrix2);
 
 
@@ -287,9 +372,23 @@
             // // track.shape.halfExtents.z = 1;
             // // console.log(1);
             // world.addBody(track_body);
-            tracks_body.insertAt(track_body, 0);
-            tracks_shape.insertAt(track_shape, 0);
+
+            // tracks_body.removeFrom(index);
+            tracks_body.updateFrom(index,track_body);
+            tracks_shape.updateFrom(index,track_shape);
             demo.addVisual(track_body);
+            //if the last one
+            console.log(tracks_body.getSize());
+            if(index == tracks_body.getSize() - 1){
+              console.log("1");
+              var type = typeOfshape.getFrom(index);
+              if(type == "Up"){
+                yaxis = init_yaxis + 6*this.value;
+              }else if (type == "Down"){
+                yaxis = init_yaxis - 6*this.value;
+              }
+            }
+            
           }
         }
 
@@ -297,18 +396,19 @@
         //@zhilin: using sigmoid function for uphill track
         function addUpHill(){
           // // Create a matrix of height values
+          init_yaxis = yaxis;
           var matrix = [];
           for (var i = 0; i < sizeX; i++) {
             matrix.push([]);
             for (var j = 0; j < sizeY; j++) {
               var height = 6/(1+Math.exp(i - 10)); // just a temp function
-              if(j===0 || j === sizeY-2)
-                height += 1;
+              // if(j===0 || j === sizeY-2)
+              //   height += 1;
               matrix[i].push(height);
 
             }
           }
-
+          init_matrix.add(matrix);
           // Create the uphill track
           var uphillShape = new CANNON.Heightfield(matrix, {
             elementSize: 1
@@ -323,21 +423,24 @@
           tracks_body.add(hfBody);
           tracks_shape.add(uphillShape);
           tracks_body.printList();
+          typeOfshape.add("Up");
         };
 
         //@zhilin: using sigmoid function for uphill track
         function addDownHill(){
+          init_yaxis = yaxis;
           // Create a matrix of S shape
           var matrixS = [];
           for (var i = 0; i < sizeX; i++) {
             matrixS.push([]);
             for (var j = 0; j < sizeY; j++) {
-              var height = 6/(1+Math.exp(-i + 10));
-              if(j===0 || j === sizeY-2)
-                height += 1;
+              var height = -6/(1+Math.exp(i - 10));
+              // if(j===0 || j === sizeY-2)
+              //   height += 1;
               matrixS[i].push(height);
             }
           }
+          init_matrix.add(matrixS);
 
           // Create the S shape
           var SShape = new CANNON.Heightfield(matrixS, {
@@ -345,7 +448,7 @@
           });
           var SBody = new CANNON.Body({ mass: 0 });
           SBody.addShape(SShape);
-          SBody.position.set(pos, -30, yaxis - 6);
+          SBody.position.set(pos, -30, yaxis);
           pos -= sizeX - 1;
           yaxis -= 6;
           world.addBody(SBody);
@@ -353,10 +456,11 @@
           tracks_body.add(SBody);
           tracks_shape.add(SShape);
           tracks_body.printList();
-
+          typeOfshape.add("Down");
         };
 
         function addUShape(){
+          init_yaxis = yaxis;
           // Create a matrix of U shape
           var matrixU = [];
           for (var i = 0; i < sizeX; i++) {
@@ -365,12 +469,12 @@
               // var height = 7 * Math.sin(i / sizeX * Math.PI + Math.PI);
 
               var height = -3*Math.cos(i/sizeX * Math.PI *2 )*Math.cos( Math.PI * 3) ;
-              if(j===0 || j === sizeY-2)
-                height += 1;
+              // if(j===0 || j === sizeY-2)
+              //   height += 1;
               matrixU[i].push(height);
             }
           }
-
+          init_matrix.add(matrixU);
 
           // Create the U shape
           var UShape = new CANNON.Heightfield(matrixU, {
@@ -385,6 +489,7 @@
           tracks_body.add(UBody);
           tracks_shape.add(UShape);
           tracks_body.printList();
+          typeOfshape.add("U");
         };
          
 
